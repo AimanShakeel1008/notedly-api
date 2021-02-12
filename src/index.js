@@ -1,6 +1,9 @@
 const express=require("express");
 const {ApolloServer,gql}=require("apollo-server-express");
 
+require('dotenv').config();
+
+
 const port=process.env.PORT || 4000;
 
 
