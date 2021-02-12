@@ -20,6 +20,9 @@ const typeDefs=gql `
         notes:[Note]!
         note(id:ID!):Note!
     }
+    type Mutation{
+        newNote(content:String!):Note!
+    }
 `;
 
 const resolvers={
@@ -27,7 +30,21 @@ const resolvers={
         hello:()=> `Hello World!!!!!!`,
         notes:()=>notes,
         note:(parent,args)=>{
+            console.log(args);
             return notes.find(note=>note.id===args.id);
+        }
+    },
+
+    Mutation:{
+        newNote:(parent,args)=>{
+            let noteValue={
+                id:notes.length+1,
+                content:args.content,
+                author:"test author"
+            };
+
+            notes.push(noteValue);
+            return noteValue;
         }
     }
 }
