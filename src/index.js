@@ -1,84 +1,30 @@
 const express=require("express");
-const {ApolloServer,gql}=require("apollo-server-express");
-
+const {ApolloServer}=require("apollo-server-express");
 require('dotenv').config();
-
-const db=require('./db');
-
-const models=require('./models')
-
 
 const port=process.env.PORT || 4000;
 
 const DB_HOST=process.env.DB_HOST;
 
+const db=require('./db');
 
-let notes=[{id:'1',content:'This is a note.',author:'Aiman'},
-            {id:'2',content:'This is also a note.',author:'Aman'},
-            {id:'3',content:'This is a note too.',author:'Amaan'}]
+const models=require('./models');
 
+const typeDefs=require('./schema');
 
-const typeDefs=gql `
-    type Note{
-        id:ID!
-        content:String!
-        author:String!
-    }
-    type Query{
-        hello:String!
-        notes:[Note]!
-        note(id:ID!):Note!
-    }
-    type Mutation{
-        newNote(content:String!):Note!
-    }
-`;
-
-const resolvers={
-    Query:{
-        hello:()=> `Hello World!!!!!!`,
-
-        notes:async ()=>{
-            return await models.Note.find();
-        },
-
-        // note:(parent,args)=>{
-        //     console.log(args);
-        //     return notes.find(note=>note.id===args.id);
-        // }
-
-        note:async(parent,args)=>{
-            return await models.Note.findById(args.id);
-        }
-        
-    },
-
-    Mutation:{
-        // newNote:(parent,args)=>{
-        //     let noteValue={
-        //         id:notes.length+1,
-        //         content:args.content,
-        //         author:"test author"
-        //     };
-
-        //     notes.push(noteValue);
-        //     return noteValue;
-        // }
-
-        newNote:async(parent,args)=>{
-            return await models.Note.create({
-                content:args.content,
-                author:"Aiman Shakeel"
-            });
-        }
-    }
-}
+const resolvers=require('./resolvers');
 
 const app=express();
 
 db.connect(DB_HOST);
 
-const server=new ApolloServer({typeDefs,resolvers});
+const server=new ApolloServer({
+    typeDefs,
+    resolvers,
+    context:()=>{
+        return {models}
+    }
+});
 
 server.applyMiddleware({app,path:'/api'});
 
